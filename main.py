@@ -19,7 +19,25 @@ def start(message):
     bot.register_next_step_handler(message, user_name)
 
 def user_name(message):
-    pass
+     global name 
+  name = message.text.strip()
+  bot.send_message(message.chat.id, 'Create password.')
+  bot.register_next_step_handler(message, user_pass)
+
+def user_pass(message):
+  password = message.text.strip()
+
+  conn = sqlite3.connect('base.sql')
+  cur = conn.cursor()
+
+  cur.execute("INSERT INTO users (name, pass) VALUES ('%s', '%s')" % (name, password))
+  conn.commit()
+  cur.close()
+  conn.close()
+
+  markup = telebot.types.InlineKeyboardMarkup()
+  markup.add(telebot.types.InlineKeyboardButton(text='List of users', callback_data='users'))
+  bot.reply_to(message, "You have been registrated", reply_markup=markup)
 
 bot.polling(none_stop=True)
 
